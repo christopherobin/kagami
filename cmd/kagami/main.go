@@ -8,8 +8,8 @@ import (
 	_ "github.com/christopherobin/kagami/provider/github"
 	_ "github.com/christopherobin/kagami/provider/gitlab"
 
+	"github.com/alecthomas/kingpin"
 	log "github.com/sirupsen/logrus"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 func init() {

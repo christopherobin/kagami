@@ -1,17 +1,16 @@
 package main
 
 import (
-	log "github.com/sirupsen/logrus"
-
 	"github.com/christopherobin/kagami"
 )
 
 func serveCommand(configPath string, logLevel string) {
 	setLogLevel(logLevel)
+	kagami.Init(configPath)
 
-	config, err := kagami.LoadConfig(configPath)
+	/*config, err := kagami.LoadConfig(configPath)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	kagami.NewServer(config)
+	kagami.NewServer(config)*/
 }

@@ -1,11 +1,29 @@
+all: tools deps test
+
+tools:
+	@echo "Installing tools"
+	@echo " * gox"
+	@go get -u github.com/mitchellh/gox
+	@echo " * dep"
+	@go get -u github.com/golang/dep/cmd/dep
+.PHONY: tools
+
+deps:
+	@echo "Installing dependencies"
+	@dep ensure
+.PHONY: deps
+
 test:
-	@go test -cover ./...
+	@echo "Running tests"
+	@go test -cover $(go list ./... | grep -v /vendor/)
 .PHONY: test
 
 install:
+	@echo "Installing kagami"
 	@go install ./cmd/...
 .PHONY: install
 
 build:
-	@gox -os="linux darwin windows openbsd" ./...
+	@echo "Build distribution binaries"
+	@gox -output="dist/{{.Dir}}_{{.OS}}_{{.Arch}}" -os="linux darwin windows openbsd" ./cmd/...
 .PHONY: build

@@ -1,3 +1,7 @@
+cache {
+  path = "/tmp/kagami"
+}
+
 # Configure the HTTP server used by kagami
 server {
   addr = ":5000"

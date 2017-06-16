@@ -1,5 +1,7 @@
 # kagami
 
+[![Build Status](https://travis-ci.org/christopherobin/kagami.svg)](https://travis-ci.org/christopherobin/kagami)
+
 Small daemon that helps mirror git repository between various
 providers such as github/bitbucket/etc...
 
@@ -17,7 +19,7 @@ Git mirroring agent
 
 Flags:
       --help           Show context-sensitive help (also try --help-long and --help-man).
-  -c, --config="/etc/kagami.hcl"  
+  -c, --config="/etc/kagami.hcl"
                        Configuration file.
   -l, --loglevel=INFO  Log level.
 

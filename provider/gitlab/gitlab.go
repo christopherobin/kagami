@@ -3,9 +3,9 @@ package provider
 import (
 	"fmt"
 
+	"github.com/christopherobin/kagami"
 	"github.com/hashicorp/hcl"
 	"github.com/hashicorp/hcl/hcl/ast"
-	"github.com/christopherobin/kagami"
 )
 
 func init() {
@@ -14,7 +14,6 @@ func init() {
 
 // Gitlab is the github provider and uses deploy keys as credentials
 type Gitlab struct {
-	Name      string `hcl:"name"`
 	DeployKey string `hcl:"deploy_key"`
 }
 
@@ -23,6 +22,11 @@ func NewGitlab(config ast.Node) kagami.Provider {
 	var gitlab Gitlab
 	hcl.DecodeObject(&gitlab, config)
 	return &gitlab
+}
+
+// Name is the name of the provider
+func (gl *Gitlab) Name() string {
+	return "github"
 }
 
 // Pull pulls a repo from github locally
