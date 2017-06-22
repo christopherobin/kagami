@@ -1,13 +1,15 @@
 package kagami
 
 import (
+	"net/http"
+
 	"github.com/hashicorp/hcl/hcl/ast"
 
 	log "github.com/sirupsen/logrus"
 )
 
 // ProviderCreateFunc is a function that creates a provider from a HCL config node
-type ProviderCreateFunc func(config ast.Node) Provider
+type ProviderCreateFunc func(name string, config ast.Node) Provider
 
 var providers map[string]ProviderCreateFunc
 
@@ -28,14 +30,16 @@ func CreateProvider(name string, config ast.Node) Provider {
 		log.Fatalf("Unknown provider %s", name)
 	}
 
-	return providers[name](config)
+	return providers[name](name, config)
 }
 
 // Provider represents a valid provider with valid credentials
 type Provider interface {
 	Name() string
+	Type() string
 	Pull(repo *Repository, path string) error
 	Push(repo *Repository, path string) error
+	ServeHTTP(w http.ResponseWriter, req *http.Request)
 }
 
 var providerInstances map[string]Provider
@@ -48,6 +52,11 @@ func RegisterProviderInstance(name string, provider Provider) {
 // GetProviderInstance returns a named provider instance
 func GetProviderInstance(name string) Provider {
 	return providerInstances[name]
+}
+
+// GetProviderInstances returns all provider instances
+func GetProviderInstances() map[string]Provider {
+	return providerInstances
 }
 
 func init() {

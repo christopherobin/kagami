@@ -18,9 +18,16 @@ func githubHandler(w http.ResponseWriter, r *http.Request) {
 
 // NewServer creates a new server instance that can answer to hooks
 func NewServer(config *Config) (*Server, error) {
-	http.HandleFunc("/hook/github", githubHandler)
+	mux := http.NewServeMux()
+
+	// Install every handler
+	for name, provider := range GetProviderInstances() {
+		log.Infof("serving provider %s at /provider/%s", name, name)
+		mux.Handle("/provider/"+name, provider)
+	}
+
 	log.Infof("starting http server on address %s", config.Server.Addr)
-	err := http.ListenAndServe(config.Server.Addr, nil)
+	err := http.ListenAndServe(config.Server.Addr, mux)
 	if err != nil {
 		return nil, err
 	}

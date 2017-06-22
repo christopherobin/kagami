@@ -12,5 +12,6 @@ func Init(configPath string) {
 	}
 
 	SetCacheInstance(NewCache(config))
+	SetMirrors(config)
 	NewServer(config)
 }

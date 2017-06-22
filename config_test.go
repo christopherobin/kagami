@@ -36,11 +36,62 @@ mirror "kagami" {
 `)
 
 func TestConfigLoad(t *testing.T) {
+	_, err := LoadConfig("config.sample.hcl")
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestConfigLoadFromString(t *testing.T) {
 	RegisterProvider("dummy", dummyProviderFactory)
 
 	_, err := LoadConfigFromBytes(testConfig)
 
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func TestConfigMissingServerEntry(t *testing.T) {
+	_, err := LoadConfigFromBytes([]byte(``))
+
+	if err == nil {
+		t.Fail()
+	}
+}
+
+func TestConfigDuplicateServerEntry(t *testing.T) {
+	_, err := LoadConfigFromBytes([]byte(`
+server {
+  addr = ":5000"
+}
+server {}
+`))
+
+	if err == nil {
+		t.Fail()
+	}
+}
+
+func TestConfigDuplicateCacheEntry(t *testing.T) {
+	_, err := LoadConfigFromBytes([]byte(`
+cache {}
+cache {}
+`))
+
+	if err == nil {
+		t.Fail()
+	}
+}
+
+func TestConfigMissingProvider(t *testing.T) {
+	_, err := LoadConfigFromBytes([]byte(`
+cache {}
+server {}
+`))
+
+	if err == nil {
+		t.Fail()
 	}
 }

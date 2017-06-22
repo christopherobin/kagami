@@ -10,13 +10,15 @@ server {
 # This is a provider, it tells kagami which provider to use
 # with which credentials
 provider "github" {
-  type = "github"
+  #type = "github"
+  type = "dummy"
 
   deploy_key = "/etc/kagami/christopherobin.pem"
 }
 
 provider "gitlab" {
-  type = "gitlab"
+  #type = "gitlab"
+  type = "dummy"
 
   deploy_key = "/etc/kagami/christopherobin.pem"
 }
