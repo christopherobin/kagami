@@ -33,6 +33,7 @@ type GitlabPushPayload struct {
 
 // Gitlab is the github provider and uses deploy keys as credentials
 type Gitlab struct {
+	UseSSH            bool   `hcl:"use_ssh"`
 	DeployKey         string `hcl:"deploy_key"`
 	DeployKeyPassword string `hcl:"deploy_key_password"`
 
@@ -66,11 +67,26 @@ func (gl *Gitlab) Pull(repo *kagami.Repository, path string) error {
 
 	log.Infof("Pulling repository %s from %s into path %s", path, gl.name, clonePath)
 
+	var auth ssh.AuthMethod
+
+	if gl.DeployKey != "" {
+		auth, err = ssh.NewPublicKeysFromFile("git", gl.DeployKey, gl.DeployKeyPassword)
+		if err != nil {
+			return err
+		}
+	}
+
 	if !repo.Exists() {
+		repoURL := "https://gitlab.com/" + path + ".git"
+		if gl.UseSSH {
+			repoURL = "git@gitlab.com:" + path + ".git"
+		}
+
 		_, err = git.PlainClone(clonePath, true, &git.CloneOptions{
-			URL:        "git@gitlab.com:" + path + ".git",
+			URL:        repoURL,
 			Progress:   os.Stdout,
 			RemoteName: gl.name,
+			Auth:       auth,
 		})
 	} else {
 		gitRepo, err := git.PlainOpen(clonePath)
@@ -80,6 +96,7 @@ func (gl *Gitlab) Pull(repo *kagami.Repository, path string) error {
 
 		err = gitRepo.Pull(&git.PullOptions{
 			RemoteName: gl.name,
+			Auth:       auth,
 		})
 	}
 
@@ -101,9 +118,14 @@ func (gl *Gitlab) Push(repo *kagami.Repository, path string) error {
 	}
 
 	if remote, _ := gitRepo.Remote(gl.name); remote == nil {
+		repoURL := "https://gitlab.com/" + path + ".git"
+		if gl.UseSSH {
+			repoURL = "git@gitlab.com:" + path + ".git"
+		}
+
 		_, err = gitRepo.CreateRemote(&config.RemoteConfig{
 			Name: gl.name,
-			URL:  "git@gitlab.com:" + path + ".git",
+			URL:  repoURL,
 		})
 
 		if err != nil {
@@ -112,9 +134,13 @@ func (gl *Gitlab) Push(repo *kagami.Repository, path string) error {
 	}
 
 	// create the SSH auth method
-	auth, err := ssh.NewPublicKeysFromFile("git", gl.DeployKey, gl.DeployKeyPassword)
-	if err != nil {
-		return err
+	var auth ssh.AuthMethod
+
+	if gl.DeployKey != "" {
+		auth, err = ssh.NewPublicKeysFromFile("git", gl.DeployKey, gl.DeployKeyPassword)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = gitRepo.Push(&git.PushOptions{

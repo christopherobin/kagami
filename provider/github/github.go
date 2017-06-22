@@ -34,6 +34,7 @@ type GithubPushPayload struct {
 // Github is the github provider and uses deploy keys as credentials
 // TODO: we could provide just wrap the normal git provider
 type Github struct {
+	UseSSH            bool   `hcl:"use_ssh"`
 	DeployKey         string `hcl:"deploy_key"`
 	DeployKeyPassword string `hcl:"deploy_key_password"`
 
@@ -67,16 +68,26 @@ func (gh *Github) Pull(repo *kagami.Repository, path string) error {
 
 	log.Infof("Pulling repository %s from %s into path %s", path, gh.name, clonePath)
 
-	auth, err := ssh.NewPublicKeysFromFile("git", gh.DeployKey, gh.DeployKeyPassword)
-	if err != nil {
-		return err
+	// create the SSH auth method
+	var auth ssh.AuthMethod
+
+	if gh.UseSSH && gh.DeployKey != "" {
+		auth, err = ssh.NewPublicKeysFromFile("git", gh.DeployKey, gh.DeployKeyPassword)
+		if err != nil {
+			return err
+		}
 	}
 
 	if !repo.Exists() {
 		// TODO: instead of building the URL here, we should find a way to forward
 		// the repo information all the way from the hook to here
+		repoURL := "https://github.com/" + path + ".git"
+		if gh.UseSSH {
+			repoURL = "git@github.com:" + path + ".git"
+		}
+
 		_, err = git.PlainClone(clonePath, true, &git.CloneOptions{
-			URL:        "git@github.com:" + path + ".git",
+			URL:        repoURL,
 			Progress:   os.Stdout,
 			RemoteName: gh.name,
 			Auth:       auth,

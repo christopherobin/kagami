@@ -1,10 +1,10 @@
 package kagami
 
 import (
-	"log"
+	log "github.com/sirupsen/logrus"
 )
 
-// Init initialize kagami
+// Init logs the config, sets the cache and mirrors, then start the http server
 func Init(configPath string) {
 	config, err := LoadConfig(configPath)
 	if err != nil {
