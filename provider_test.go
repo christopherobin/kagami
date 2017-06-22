@@ -1,6 +1,7 @@
 package kagami
 
 import (
+	"net/http"
 	"testing"
 
 	"reflect"
@@ -11,22 +12,34 @@ import (
 // helpers
 var providerType = reflect.TypeOf((*Provider)(nil)).Elem()
 
-type dummyProvider struct{}
-
-func dummyProviderFactory(_ ast.Node) Provider {
-	return &dummyProvider{}
+type dummyProvider struct {
+	name string
 }
 
-func (t dummyProvider) Name() string {
+func dummyProviderFactory(name string, _ ast.Node) Provider {
+	return &dummyProvider{
+		name: name,
+	}
+}
+
+func (t *dummyProvider) Name() string {
+	return t.name
+}
+
+func (t *dummyProvider) Type() string {
 	return "dummy"
 }
 
-func (t dummyProvider) Pull(repo *Repository, path string) error {
+func (t *dummyProvider) Pull(repo *Repository, path string) error {
 	return nil
 }
 
-func (t dummyProvider) Push(repo *Repository, path string) error {
+func (t *dummyProvider) Push(repo *Repository, path string) error {
 	return nil
+}
+
+func (t *dummyProvider) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(501)
 }
 
 func TestProviderRegister(t *testing.T) {
