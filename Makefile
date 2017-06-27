@@ -6,6 +6,8 @@ tools:
 	@go get -u github.com/mitchellh/gox
 	@echo " * dep"
 	@go get -u github.com/golang/dep/cmd/dep
+	@echo " * gocov"
+	@go get -u github.com/axw/gocov/gocov
 .PHONY: tools
 
 deps:

@@ -1,4 +1,5 @@
 /vendor
+/cc-test-reporter
 
 # Binaries for programs and plugins
 *.exe
